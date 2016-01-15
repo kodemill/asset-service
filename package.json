@@ -1,0 +1,16 @@
+{
+  "name": "asset-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "co": "^4.6.0",
+    "env": "0.0.2",
+    "mongoose": "^4.3.6"
+  }
+}
