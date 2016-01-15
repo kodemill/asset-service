@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "co": "^4.6.0",
-    "env": "0.0.2",
+    "dotenv": "^1.2.0",
     "mongoose": "^4.3.6"
   }
 }
