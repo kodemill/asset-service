@@ -4,8 +4,11 @@ const maxFileSizeInByte = 1048576 * 24;
 const co = require('co');
 const fs = require('co-fs');
 const mongoose = require('mongoose');
+//mongoose model
 const Image = mongoose.model('Image', require('../../model/image'));
-const mkdirp = require('mkdirp').sync(process.env.ASSET_ROOT);
+const gmIdentify = require('./gm-identify');
+//ensure asset folder
+require('mkdirp').sync(process.env.ASSET_ROOT);
 
 
 exports.register = function (server, options, next) {
@@ -22,12 +25,15 @@ exports.register = function (server, options, next) {
         co(function* () {
           let payload = request.payload;
           if (payload.file && Buffer.isBuffer(payload.file)) {
-            console.log(Object.keys(request))
+            var imgMeta = yield gmIdentify(payload.file);
             let path = options.temp || process.env.ASSET_ROOT;
-            path += '/ADMIN' + Date.now().toString() + '.jpg';
+            path += '/' + imgMeta.Signature + '.' + imgMeta.format.toLowerCase();
             yield fs.writeFile(path, payload.file);
-        //  } else if (payload.file && Stream.isStream(payload.file) {
-
+            let newOne = yield new Image({
+              url: path,
+              gmIdentify: imgMeta
+            });
+            yield newOne.save();
           } else throw new Error();
         }).then( () => {
           reply();

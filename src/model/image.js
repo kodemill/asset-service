@@ -1,23 +1,15 @@
 'use strict';
-const mongoose = require('mongoose');
+const Schema = require('mongoose').Schema;
 
-let ImageSchema = mongoose.Schema({
+let ImageSchema = new Schema({
   url: {
     type: String,
     required: true
   },
-  size: {
-    type: Number,
-    required: false
-  },
-  width: {
-    type: Number,
-    required: false
-  },
-  height: {
-    type: Number,
+  gmIdentify: {
+    type: Schema.Types.Mixed,
     required: false
   }
 });
 
-exports = ImageSchema;
+module.exports = ImageSchema;
