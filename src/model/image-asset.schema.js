@@ -1,15 +1,13 @@
 'use strict';
 const Schema = require('mongoose').Schema;
-
-let ImageSchema = new Schema({
+module.exports = new Schema({
   url: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   gmIdentify: {
     type: Schema.Types.Mixed,
     required: false
   }
 });
-
-module.exports = ImageSchema;

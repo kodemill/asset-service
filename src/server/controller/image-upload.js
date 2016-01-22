@@ -5,13 +5,15 @@ const co = require('co');
 const fs = require('co-fs');
 const mongoose = require('mongoose');
 //mongoose model
-const Image = mongoose.model('Image', require('../../model/image'));
+const Image = require('../../model/').Image;
+const ImageAsset = require('../../model/').ImageAsset;
 const gmIdentify = require('./gm-identify');
-//ensure asset folder
-require('mkdirp').sync(process.env.ASSET_ROOT);
 
 
 exports.register = function (server, options, next) {
+  //ensure asset orig fold
+  const uploadFolder = options.uploadFolder || process.env.ASSET_ROOT + '/upload/';
+  require('mkdirp').sync(uploadFolder);
   server.route({
     method: 'POST',
     path: options.route || '/upload',
@@ -25,19 +27,31 @@ exports.register = function (server, options, next) {
         co(function* () {
           let payload = request.payload;
           if (payload.file && Buffer.isBuffer(payload.file)) {
-            var imgMeta = yield gmIdentify(payload.file);
-            let path = options.temp || process.env.ASSET_ROOT;
-            path += '/' + imgMeta.Signature + '.' + imgMeta.format.toLowerCase();
+            let imgMeta = yield gmIdentify(payload.file);
+            let path = uploadFolder + imgMeta.Signature + '.' + imgMeta.format.toLowerCase();
+            //yield fs.access(path, fs.F_OK);
             yield fs.writeFile(path, payload.file);
-            let newOne = yield new Image({
-              url: path,
-              gmIdentify: imgMeta
+            try {
+              let asset = yield ImageAsset.create({
+                  url: path,
+                  gmIdentify: imgMeta
+              });
+            } catch (err) {
+              return reply(err);
+            }
+            let image = yield Image.create({
+              assets: [{
+                asset,
+                width: asset.gmIdentify.size.width,
+                height: asset.gmIdentify.size.height
+              }],
             });
-            yield newOne.save();
           } else throw new Error();
         }).then( () => {
+          console.log('should be ok')
           reply();
         }).catch( err => {
+        //  throw err;
           console.log(err);
           reply();
         });
